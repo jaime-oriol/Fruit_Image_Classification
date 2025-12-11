@@ -1,5 +1,5 @@
 """
-Model evaluation and metrics visualization.
+Model evaluation and metrics visualization for fruit classification.
 Calculates accuracy, generates confusion matrix, and plots training history.
 """
 
@@ -17,7 +17,7 @@ def evaluate_model(model, test_loader, class_names, device=None):
     Args:
         model: Trained PyTorch model (CustomCNN or ResNet18)
         test_loader: DataLoader with test data
-        class_names: List of league names (26 leagues)
+        class_names: List of fruit names (22 fruits)
         device: Device to run evaluation on (cuda/cpu)
 
     Returns:
@@ -46,7 +46,7 @@ def evaluate_model(model, test_loader, class_names, device=None):
             inputs, labels = inputs.to(device), labels.to(device)
 
             # Forward pass: get model predictions
-            outputs = model(inputs)  # Shape: (batch_size, 26)
+            outputs = model(inputs)  # Shape: (batch_size, 22)
 
             # Get predicted class (index with highest score)
             _, predicted = outputs.max(1)
@@ -63,13 +63,13 @@ def evaluate_model(model, test_loader, class_names, device=None):
     print(f'Test Accuracy: {accuracy:.2f}%')
 
     # Print detailed classification report
-    # Shows precision, recall, F1-score for each league
+    # Shows precision, recall, F1-score for each fruit
     print('\nClassification Report:')
     print(classification_report(
         all_labels,
         all_preds,
         target_names=class_names,
-        zero_division=0  # Handle leagues with no test samples
+        zero_division=0  # Handle fruits with no test samples
     ))
 
     # Return results dictionary
@@ -83,16 +83,15 @@ def evaluate_model(model, test_loader, class_names, device=None):
 def plot_confusion_matrix(labels, predictions, class_names, figsize=(12, 10)):
     """
     Visualize confusion matrix as a heatmap.
-    Shows which leagues the model confuses with each other.
+    Shows which fruits the model confuses with each other.
 
     Args:
-        labels: True labels (list of integers 0-25)
-        predictions: Predicted labels (list of integers 0-25)
-        class_names: List of league names for axis labels
+        labels: True labels (list of integers 0-21)
+        predictions: Predicted labels (list of integers 0-21)
+        class_names: List of fruit names for axis labels
         figsize: Figure size in inches (width, height)
     """
     # Calculate confusion matrix
-    # Element [i,j] = number of times league i was predicted as league j
     cm = confusion_matrix(labels, predictions)
 
     # Create figure
@@ -101,18 +100,18 @@ def plot_confusion_matrix(labels, predictions, class_names, figsize=(12, 10)):
     # Plot heatmap using seaborn
     sns.heatmap(
         cm,
-        annot=True,           # Show numbers in cells
-        fmt='d',              # Format as integers
-        cmap='Blues',         # Blue color scheme
-        xticklabels=class_names,  # League names on x-axis
-        yticklabels=class_names   # League names on y-axis
+        annot=True,
+        fmt='d',
+        cmap='Blues',
+        xticklabels=class_names,
+        yticklabels=class_names
     )
 
     # Add labels and title
     plt.title('Confusion Matrix')
-    plt.ylabel('True Label')        # Rows = actual leagues
-    plt.xlabel('Predicted Label')   # Columns = predicted leagues
-    plt.xticks(rotation=45, ha='right')  # Rotate x-labels for readability
+    plt.ylabel('True Label')
+    plt.xlabel('Predicted Label')
+    plt.xticks(rotation=45, ha='right')
     plt.yticks(rotation=0)
     plt.tight_layout()
     plt.show()

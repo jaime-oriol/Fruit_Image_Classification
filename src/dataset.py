@@ -1,5 +1,5 @@
 """
-Dataset loading and preparation for football logo classification.
+Dataset loading and preparation for fruit classification.
 Handles image transformations and creates train/val/test splits.
 """
 
@@ -20,51 +20,33 @@ def get_transforms(augment=True):
         Composed transformation pipeline
     """
     if augment:
-        # Training transformations with AGGRESSIVE augmentation
-        # IMPORTANT: NO horizontal flip (would reverse text in logos)
+        # Training transformations with moderate augmentation for fruits
         return transforms.Compose([
-            # Resize all logos to 224x224 (standard input size for CNNs)
+            # Resize all images to 224x224 (standard input size for CNNs)
             transforms.Resize((224, 224)),
 
-            # Random rotation ±10 degrees (keeps text readable)
-            # Simulates logos at slight angles or tilted photos
-            transforms.RandomRotation(degrees=10),
+            # Random horizontal flip (fruits can be flipped)
+            transforms.RandomHorizontalFlip(p=0.5),
 
-            # Random zoom and translation
-            # translate=(0.1, 0.1): shift up to 10% horizontally/vertically
-            # scale=(0.85, 1.15): zoom between 85% and 115%
-            # Simulates different distances and positions in frame
-            transforms.RandomAffine(
-                degrees=0,
-                translate=(0.1, 0.1),
-                scale=(0.85, 1.15)
-            ),
+            # Random rotation ±15 degrees
+            # Simulates fruits at different angles
+            transforms.RandomRotation(degrees=15),
 
-            # Aggressive color variations (but keeping text readable)
-            # brightness=0.4: ±40% brightness variation
-            # contrast=0.4: ±40% contrast variation
-            # saturation=0.3: ±30% saturation variation
-            # hue=0.1: slight hue shift (±10% color wheel)
-            # Simulates different lighting, cameras, image qualities
+            # Moderate color variations
+            # brightness=0.2: ±20% brightness variation
+            # contrast=0.2: ±20% contrast variation
+            # saturation=0.2: ±20% saturation variation
+            # hue=0.05: slight hue shift (±5% color wheel)
+            # Simulates different lighting conditions
             transforms.ColorJitter(
-                brightness=0.4,
-                contrast=0.4,
-                saturation=0.3,
-                hue=0.1
+                brightness=0.2,
+                contrast=0.2,
+                saturation=0.2,
+                hue=0.05
             ),
-
-            # Random perspective distortion (moderate, keeps text readable)
-            # distortion_scale=0.2: up to 20% perspective distortion
-            # Simulates logos viewed from different angles
-            transforms.RandomPerspective(distortion_scale=0.2, p=0.4),
 
             # Convert PIL image to PyTorch tensor (0-1 range)
             transforms.ToTensor(),
-
-            # Random erasing (20% probability)
-            # Randomly mask small regions to improve robustness
-            # scale=(0.02, 0.1): erase 2-10% of image area
-            transforms.RandomErasing(p=0.2, scale=(0.02, 0.1)),
 
             # Normalize using ImageNet statistics
             # These are standard values for pretrained models like ResNet
@@ -90,13 +72,13 @@ def get_transforms(augment=True):
         ])
 
 
-def get_dataloaders(data_dir, batch_size=16, val_split=0.15, test_split=0.15):
+def get_dataloaders(data_dir='data_fruits', batch_size=32, val_split=0.15, test_split=0.15):
     """
-    Create train, validation, and test data loaders from logo dataset.
+    Create train, validation, and test data loaders from fruit dataset.
 
     Args:
-        data_dir: Path to data folder containing league subfolders
-        batch_size: Number of images per batch (16 for small datasets)
+        data_dir: Path to data folder containing fruit subfolders
+        batch_size: Number of images per batch (32 for larger datasets)
         val_split: Fraction of data for validation (15% = 0.15)
         test_split: Fraction of data for testing (15% = 0.15)
 
@@ -104,20 +86,20 @@ def get_dataloaders(data_dir, batch_size=16, val_split=0.15, test_split=0.15):
         train_loader: DataLoader for training
         val_loader: DataLoader for validation
         test_loader: DataLoader for testing
-        class_names: List of league names (26 leagues)
+        class_names: List of fruit names (22 fruits)
     """
     # Load dataset using ImageFolder
-    # Automatically assigns labels based on subfolder names (league names)
+    # Automatically assigns labels based on subfolder names (fruit names)
     full_dataset = datasets.ImageFolder(
         root=data_dir,
         transform=get_transforms(augment=False)  # Start with no augmentation
     )
 
     # Calculate split sizes
-    total_size = len(full_dataset)  # Total number of logos (605)
-    test_size = int(total_size * test_split)   # 15% for testing (~91 images)
-    val_size = int(total_size * val_split)     # 15% for validation (~91 images)
-    train_size = total_size - test_size - val_size  # Remaining 70% for training (~423 images)
+    total_size = len(full_dataset)  # Total number of images
+    test_size = int(total_size * test_split)   # 15% for testing
+    val_size = int(total_size * val_split)     # 15% for validation
+    train_size = total_size - test_size - val_size  # Remaining 70% for training
 
     # Randomly split dataset into train/val/test
     # Use fixed seed (42) for reproducible splits
@@ -134,7 +116,7 @@ def get_dataloaders(data_dir, batch_size=16, val_split=0.15, test_split=0.15):
     # Create DataLoader for training
     train_loader = DataLoader(
         train_dataset,
-        batch_size=batch_size,  # Process 32 images at once
+        batch_size=batch_size,  # Process images at once
         shuffle=True,           # Shuffle data every epoch (important for training)
         num_workers=2           # Use 2 parallel workers to load data faster
     )
@@ -155,5 +137,5 @@ def get_dataloaders(data_dir, batch_size=16, val_split=0.15, test_split=0.15):
         num_workers=2
     )
 
-    # Return all three loaders plus the league names
+    # Return all three loaders plus the fruit names
     return train_loader, val_loader, test_loader, full_dataset.classes
