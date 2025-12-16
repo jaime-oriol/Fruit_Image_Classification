@@ -28,28 +28,28 @@ class CustomCNN(nn.Module):
             # Block 1: RGB input -> 32 feature maps
             nn.Conv2d(3, 32, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # 224->112
+            nn.MaxPool2d(kernel_size=2, stride=2),  # 96->48
 
             # Block 2: 32 -> 64 feature maps
             nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # 112->56
+            nn.MaxPool2d(kernel_size=2, stride=2),  # 48->24
 
             # Block 3: 64 -> 128 feature maps
             nn.Conv2d(64, 128, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # 56->28
+            nn.MaxPool2d(kernel_size=2, stride=2),  # 24->12
 
             # Block 4: 128 -> 256 feature maps (added for more capacity)
             nn.Conv2d(128, 256, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=2, stride=2),  # 28->14
+            nn.MaxPool2d(kernel_size=2, stride=2),  # 12->6
         )
 
         # Classification layers
         self.classifier = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(256 * 14 * 14, 512),
+            nn.Linear(256 * 6 * 6, 512),
             nn.ReLU(inplace=True),
             nn.Dropout(0.3),  # Moderate dropout
             nn.Linear(512, num_classes)
@@ -60,7 +60,7 @@ class CustomCNN(nn.Module):
         Forward pass through the network.
 
         Args:
-            x: Input tensor of shape (batch_size, 3, 224, 224)
+            x: Input tensor of shape (batch_size, 3, 96, 96)
 
         Returns:
             Output tensor of shape (batch_size, num_classes)

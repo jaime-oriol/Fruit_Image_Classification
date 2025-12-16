@@ -30,8 +30,8 @@ def get_transforms(augment=True):
     if augment:
         # Training transformations with moderate augmentation
         return transforms.Compose([
-            # Resize all images to 224x224 (standard input size for CNNs)
-            transforms.Resize((224, 224)),
+            # Resize all images to 96x96 (reduced for faster training)
+            transforms.Resize((96, 96)),
 
             # Random horizontal flip
             transforms.RandomHorizontalFlip(p=0.5),
@@ -65,7 +65,7 @@ def get_transforms(augment=True):
         # Validation/test transformations without augmentation
         return transforms.Compose([
             # Same resize for consistency
-            transforms.Resize((224, 224)),
+            transforms.Resize((96, 96)),
 
             # Convert to tensor
             transforms.ToTensor(),
