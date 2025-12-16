@@ -124,7 +124,9 @@ def get_dataloaders(data_dir='data', batch_size=32, val_split=0.15, test_split=0
         train_dataset,
         batch_size=batch_size,  # Process images at once
         shuffle=True,           # Shuffle data every epoch (important for training)
-        num_workers=2           # Use 2 parallel workers to load data faster
+        num_workers=2,          # 2 workers for data loading
+        pin_memory=True,        # Faster GPU transfer
+        persistent_workers=True # Keep workers alive between epochs
     )
 
     # Create DataLoader for validation
@@ -132,7 +134,9 @@ def get_dataloaders(data_dir='data', batch_size=32, val_split=0.15, test_split=0
         val_dataset,
         batch_size=batch_size,
         shuffle=False,          # No need to shuffle validation data
-        num_workers=2
+        num_workers=2,
+        pin_memory=True,
+        persistent_workers=True
     )
 
     # Create DataLoader for testing
@@ -140,7 +144,9 @@ def get_dataloaders(data_dir='data', batch_size=32, val_split=0.15, test_split=0
         test_dataset,
         batch_size=batch_size,
         shuffle=False,          # No need to shuffle test data
-        num_workers=2
+        num_workers=2,
+        pin_memory=True,
+        persistent_workers=True
     )
 
     # Return all three loaders plus the class names

@@ -64,7 +64,7 @@ def train_model(model, train_loader, val_loader, epochs=20, lr=0.001, weight_dec
         train_total = 0       # Total number of samples
 
         # Iterate through training batches
-        for inputs, labels in train_loader:
+        for batch_idx, (inputs, labels) in enumerate(train_loader):
             # Move batch data to device (GPU/CPU)
             inputs, labels = inputs.to(device), labels.to(device)
 
@@ -91,6 +91,12 @@ def train_model(model, train_loader, val_loader, epochs=20, lr=0.001, weight_dec
             _, predicted = outputs.max(1)                      # Get predicted class (highest score)
             train_total += labels.size(0)                      # Count samples
             train_correct += predicted.eq(labels).sum().item() # Count correct predictions
+
+            # Print progress every 50 batches
+            if (batch_idx + 1) % 50 == 0:
+                current_loss = train_loss / (batch_idx + 1)
+                current_acc = 100. * train_correct / train_total
+                print(f'  Batch [{batch_idx + 1}/{len(train_loader)}] - Loss: {current_loss:.4f}, Acc: {current_acc:.2f}%')
 
         # Calculate average training metrics for this epoch
         train_loss = train_loss / len(train_loader)  # Average loss across batches
