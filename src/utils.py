@@ -33,7 +33,7 @@ def predict_image(image_path, model, class_names, device=None, top_k=3):
     # Define same transformations used during training
     # This ensures consistency between training and inference
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),  # Resize to standard input size
+        transforms.Resize((96, 96)),  # Resize to match training size
         transforms.ToTensor(),           # Convert to tensor
         transforms.Normalize(            # Normalize with ImageNet stats
             mean=[0.485, 0.456, 0.406],
@@ -45,7 +45,7 @@ def predict_image(image_path, model, class_names, device=None, top_k=3):
     image = Image.open(image_path).convert('RGB')
 
     # Apply transformations and add batch dimension
-    image_tensor = transform(image).unsqueeze(0).to(device)  # Shape: (1, 3, 224, 224)
+    image_tensor = transform(image).unsqueeze(0).to(device)  # Shape: (1, 3, 96, 96)
 
     # Move model to device and set to evaluation mode
     model = model.to(device)
@@ -134,7 +134,7 @@ def predict_from_dataset(dataset, model, class_names, idx, device=None, top_k=3)
     image, true_label = dataset[idx]
 
     # Add batch dimension and move to device
-    image_batch = image.unsqueeze(0).to(device)  # Shape: (1, 3, 224, 224)
+    image_batch = image.unsqueeze(0).to(device)  # Shape: (1, 3, 96, 96)
 
     # Move model to device and set to evaluation mode
     model = model.to(device)
@@ -166,13 +166,13 @@ def visualize_prediction_from_dataset(image_tensor, predictions, true_label):
     Shows the image, true label, and prediction probabilities.
 
     Args:
-        image_tensor: Normalized tensor from dataset (3, 224, 224)
+        image_tensor: Normalized tensor from dataset (3, 96, 96)
         predictions: List of (class_name, probability) tuples
         true_label: True class name (string)
     """
     # Denormalize image for display
     # Reverse the ImageNet normalization applied during preprocessing
-    image = image_tensor.permute(1, 2, 0)  # Change from (3,224,224) to (224,224,3)
+    image = image_tensor.permute(1, 2, 0)  # Change from (3,96,96) to (96,96,3)
     mean = torch.tensor([0.485, 0.456, 0.406])
     std = torch.tensor([0.229, 0.224, 0.225])
     image = image * std + mean  # Reverse normalization
